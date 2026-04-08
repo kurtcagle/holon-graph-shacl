@@ -1,0 +1,324 @@
+# ============================================================
+# Holonic Graph Architecture — SKOS Taxonomy
+# holon-taxonomy.ttl
+#
+# Namespace:   https://ontologist.io/ns/holon#
+# Version:     0.9.0
+# Date:        2026-04-02
+# Author:      Kurt Cagle <https://ontologist.io/person/kurt-cagle>
+#
+# Description:
+#   SKOS concept scheme providing a navigable taxonomy of the
+#   core concepts in Holonic Graph Architecture, with mappings
+#   to related external vocabularies and theoretical frameworks.
+#
+# ============================================================
+
+@prefix holon:   <https://ontologist.io/ns/holon#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+
+# ============================================================
+# Concept Scheme
+# ============================================================
+
+holon:HGAConceptScheme
+    a skos:ConceptScheme ;
+    skos:prefLabel "Holonic Graph Architecture Concept Scheme"@en ;
+    dcterms:description
+        "SKOS taxonomy of the principal concepts, layers, and patterns of the Holonic Graph Architecture (HGA)."@en ;
+    dcterms:creator <https://ontologist.io/person/kurt-cagle> ;
+    dcterms:created "2026-04-02"^^xsd:date ;
+    skos:hasTopConcept
+        holon:concept-Holon,
+        holon:concept-LayerModel,
+        holon:concept-Portal,
+        holon:concept-ActiveInference,
+        holon:concept-Projection,
+        holon:concept-Narrative .
+
+
+# ============================================================
+# Top-Level Concepts
+# ============================================================
+
+holon:concept-Holon
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:topConceptOf holon:HGAConceptScheme ;
+    skos:prefLabel "Holon"@en ;
+    skos:definition
+        "A unit that is simultaneously a whole in its own right and a part of a larger whole. The fundamental building block of HGA."@en ;
+    skos:scopeNote
+        "Derived from Arthur Koestler, 'The Ghost in the Machine' (1967). Every structure in HGA is either a holon or a relation between holons."@en ;
+    skos:narrower
+        holon:concept-ActorHolon,
+        holon:concept-NarrativeHolon,
+        holon:concept-ProxyHolon,
+        holon:concept-ApexHolon ;
+    skos:related holon:concept-Holarchy .
+
+holon:concept-Holarchy
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Holarchy"@en ;
+    skos:definition
+        "A hierarchical structure composed entirely of holons, where each level is simultaneously a whole at its own level and a part at the level above."@en ;
+    skos:related holon:concept-Holon .
+
+holon:concept-LayerModel
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:topConceptOf holon:HGAConceptScheme ;
+    skos:prefLabel "Four-Layer Model"@en ;
+    skos:definition
+        "The four-layer structural decomposition of every holon: SceneGraph (L1), DomainGraph (L2), ContextGraph (L3), HolonicGraph (L4)."@en ;
+    skos:narrower
+        holon:concept-L1-SceneGraph,
+        holon:concept-L2-DomainGraph,
+        holon:concept-L3-ContextGraph,
+        holon:concept-L4-HolonicGraph .
+
+holon:concept-L1-SceneGraph
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Scene Graph (L1)"@en ;
+    skos:altLabel "Interior Graph"@en, "Immanent Layer"@en ;
+    skos:definition
+        "The interior layer of a holon: entities, events, local state, and their relations as they exist within the holon's own perspective."@en ;
+    skos:broader holon:concept-LayerModel ;
+    skos:related holon:concept-ActiveInference-InternalStates ;
+    skos:notation "L1"^^xsd:string .
+
+holon:concept-L2-DomainGraph
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Domain Graph (L2)"@en ;
+    skos:altLabel "Boundary Layer"@en, "Normative Layer"@en, "Markov Blanket Layer"@en ;
+    skos:definition
+        "The normative boundary layer: constraints, type definitions, inference rules, and SHACL shapes that govern what may exist within the holon and how it interacts with its environment."@en ;
+    skos:scopeNote
+        "Structurally equivalent to a Markov blanket in Active Inference. SHACL constraint violations at this layer constitute prediction errors."@en ;
+    skos:broader holon:concept-LayerModel ;
+    skos:related holon:concept-MarkovBlanket, holon:concept-PredictionError ;
+    skos:notation "L2"^^xsd:string .
+
+holon:concept-L3-ContextGraph
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Context Graph (L3)"@en ;
+    skos:altLabel "Situational Layer"@en, "Relational Layer"@en ;
+    skos:definition
+        "The relational layer: cross-holon relations, situational positioning, and the holon's participation in wider knowledge structures."@en ;
+    skos:broader holon:concept-LayerModel ;
+    skos:notation "L3"^^xsd:string .
+
+holon:concept-L4-HolonicGraph
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Holonic Graph (L4)"@en ;
+    skos:altLabel "Meta Layer"@en, "Compositional Layer"@en ;
+    skos:definition
+        "The meta-level compositional layer: how holons compose into larger structures, spawn operations, and governance of the holarchy."@en ;
+    skos:broader holon:concept-LayerModel ;
+    skos:notation "L4"^^xsd:string .
+
+
+# ============================================================
+# Portal Concepts
+# ============================================================
+
+holon:concept-Portal
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:topConceptOf holon:HGAConceptScheme ;
+    skos:prefLabel "Portal"@en ;
+    skos:definition
+        "A typed, directional boundary interface that mediates information exchange between holons. The portal is the sanctioned mechanism for cross-holon communication, enforcing DomainGraph boundary integrity."@en ;
+    skos:narrower
+        holon:concept-InputPortal,
+        holon:concept-OutputPortal,
+        holon:concept-BidirectionalPortal .
+
+holon:concept-InputPortal
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Input Portal"@en ;
+    skos:broader holon:concept-Portal ;
+    skos:definition "A portal receiving information from an external holon."@en .
+
+holon:concept-OutputPortal
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Output Portal"@en ;
+    skos:broader holon:concept-Portal ;
+    skos:definition "A portal transmitting information to an external holon."@en .
+
+holon:concept-BidirectionalPortal
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Bidirectional Portal"@en ;
+    skos:broader holon:concept-Portal ;
+    skos:definition "A portal supporting both inbound and outbound information flow."@en .
+
+
+# ============================================================
+# Active Inference Concepts
+# ============================================================
+
+holon:concept-ActiveInference
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:topConceptOf holon:HGAConceptScheme ;
+    skos:prefLabel "Active Inference"@en ;
+    skos:definition
+        "A theoretical framework (Friston 2010–) in which agents minimise free energy (surprise) by updating internal models and acting on the environment. HGA maps Active Inference dynamics onto the static four-layer structure."@en ;
+    skos:narrower
+        holon:concept-MarkovBlanket,
+        holon:concept-PredictionError,
+        holon:concept-FreeEnergy,
+        holon:concept-ActiveInference-InternalStates .
+
+holon:concept-MarkovBlanket
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Markov Blanket"@en ;
+    skos:definition
+        "A statistical boundary separating internal states from external states, such that internal and external states are conditionally independent given the blanket states. In HGA, the DomainGraph (L2) is structurally isomorphic to a Markov blanket."@en ;
+    skos:broader holon:concept-ActiveInference ;
+    skos:exactMatch holon:concept-L2-DomainGraph .
+
+holon:concept-PredictionError
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Prediction Error"@en ;
+    skos:definition
+        "The discrepancy between a holon's prior expectations (encoded in its DomainGraph) and observed states. In HGA, SHACL constraint violations at L2 are interpreted as prediction errors requiring model revision."@en ;
+    skos:broader holon:concept-ActiveInference .
+
+holon:concept-FreeEnergy
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Free Energy"@en ;
+    skos:definition
+        "The variational free energy that agents minimise in Active Inference. In HGA, accumulated prediction error across a holon's DomainGraph corresponds to free energy. Full SHACL conformance = minimum free energy state."@en ;
+    skos:broader holon:concept-ActiveInference .
+
+holon:concept-ActiveInference-InternalStates
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Internal States (Active Inference)"@en ;
+    skos:definition
+        "The states inside the Markov blanket that are not directly accessible to the external environment. Maps to the SceneGraph (L1) in HGA."@en ;
+    skos:broader holon:concept-ActiveInference ;
+    skos:exactMatch holon:concept-L1-SceneGraph .
+
+
+# ============================================================
+# Projection Concepts
+# ============================================================
+
+holon:concept-Projection
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:topConceptOf holon:HGAConceptScheme ;
+    skos:prefLabel "Projection Graph"@en ;
+    skos:definition
+        "A lossy representation of a holonic structure projected onto a specialised coordinate system. Preserves selected structural properties; suppresses others."@en ;
+    skos:narrower holon:concept-WardleyMap .
+
+holon:concept-WardleyMap
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Wardley Map"@en ;
+    skos:definition
+        "A strategic projection graph that plots value-chain components against an evolution axis (Genesis → Custom-Built → Product → Commodity). Formally a specialisation of holon:ProjectionGraph."@en ;
+    skos:broader holon:concept-Projection ;
+    skos:scopeNote "Defined in the wardley: ontology (https://ontologist.io/ns/wardley#)."@en .
+
+
+# ============================================================
+# Narrative Concepts
+# ============================================================
+
+holon:concept-Narrative
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:topConceptOf holon:HGAConceptScheme ;
+    skos:prefLabel "Narrative Holons"@en ;
+    skos:definition
+        "The extension of HGA to narrative theory, mapping Genette's narratological triad onto the four holonic layers."@en ;
+    skos:narrower
+        holon:concept-Fabula,
+        holon:concept-Sjuzhet,
+        holon:concept-Narration,
+        holon:concept-WorldBuilding,
+        holon:concept-Historiography .
+
+holon:concept-Fabula
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Fabula"@en ;
+    skos:altLabel "Story-World"@en ;
+    skos:definition
+        "The chronological sequence of events in the story-world. Maps to the SceneGraph (L1) of a NarrativeHolon."@en ;
+    skos:broader holon:concept-Narrative ;
+    skos:exactMatch holon:concept-L1-SceneGraph .
+
+holon:concept-Sjuzhet
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Sjuzhet"@en ;
+    skos:altLabel "Narrative Discourse"@en ;
+    skos:definition
+        "The order and manner in which story events are presented to the reader/audience. Maps to the ContextGraph (L3) of a NarrativeHolon."@en ;
+    skos:broader holon:concept-Narrative .
+
+holon:concept-Narration
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Narration"@en ;
+    skos:definition
+        "The act of telling: the governing perspective and voice that produces the narrative. Maps to the HolonicGraph (L4) of a NarrativeHolon."@en ;
+    skos:broader holon:concept-Narrative .
+
+holon:concept-WorldBuilding
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "World-Building"@en ;
+    skos:definition
+        "The act of constructing a narrative world's rules, history, and ontology. In HGA terms, world-building is the construction of a WorldHolon's DomainGraph (L2)."@en ;
+    skos:broader holon:concept-Narrative .
+
+holon:concept-Historiography
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Historiography"@en ;
+    skos:definition
+        "The study and writing of history. In HGA terms, historiography is the partial and uncertain reconstruction of a WorldHolon's SceneGraph from incomplete, biased, or degraded evidence."@en ;
+    skos:broader holon:concept-Narrative .
+
+
+# ============================================================
+# Spawn and DataBooks
+# ============================================================
+
+holon:concept-Spawn
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "Spawn"@en ;
+    skos:definition
+        "The named operation by which a HolonicGraph (L4) creates a new sub-holon instance. Spawn is the primary mechanism for dynamic holon instantiation and is foundational to the DataBook pattern."@en .
+
+holon:concept-DataBook
+    a skos:Concept ;
+    skos:inScheme holon:HGAConceptScheme ;
+    skos:prefLabel "DataBook"@en ;
+    skos:definition
+        "A composable, bounded semantic graph library encoded as a Markdown carrier file (YAML frontmatter + fenced Turtle/JSON-LD blocks). DataBooks are the primary distribution unit for holonic ontology fragments and can be instantiated via holon:spawn."@en ;
+    skos:related holon:concept-Spawn .

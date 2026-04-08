@@ -1,0 +1,383 @@
+# ============================================================
+# Holonic Graph Architecture — Core Ontology
+# holon-core.ttl
+#
+# Namespace:   https://ontologist.io/ns/holon#
+# Prefix:      holon:
+# Version:     0.9.0
+# Date:        2026-04-02
+# Author:      Kurt Cagle <https://ontologist.io/person/kurt-cagle>
+# Repository:  https://github.com/kurtcagle/holon-graph
+#
+# Description:
+#   Core OWL ontology for the Holonic Graph Architecture (HGA),
+#   a four-layer RDF 1.2 knowledge representation framework.
+#   The four layers are:
+#     L1 - SceneGraph    : interior / immanent state
+#     L2 - DomainGraph   : boundary / normative (≅ Markov blanket)
+#     L3 - ContextGraph  : relational / situational
+#     L4 - HolonicGraph  : meta-level / compositional
+#
+#   Theoretical grounding:
+#     - Koestler (1967): holon as simultaneously whole and part
+#     - Friston (2010–): Active Inference; DomainGraph ≅ Markov blanket
+#     - Genette (1980): narratological triad mapped to holonic layers
+#
+# ============================================================
+
+@prefix holon:   <https://ontologist.io/ns/holon#> .
+@prefix portal:  <https://ontologist.io/ns/portal#> .
+@prefix agent:   <https://ontologist.io/ns/agent#> .
+@prefix session: <https://ontologist.io/ns/session#> .
+
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix prov:    <http://www.w3.org/ns/prov#> .
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+
+
+# ============================================================
+# Ontology Declaration
+# ============================================================
+
+<https://ontologist.io/ns/holon>
+    a owl:Ontology ;
+    dcterms:title "Holonic Graph Architecture Core Ontology"@en ;
+    dcterms:description
+        "Core ontology for the Holonic Graph Architecture (HGA), defining the four-layer graph model, portal interfaces, projection graphs, actor holons, and Active Inference mappings."@en ;
+    dcterms:creator <https://ontologist.io/person/kurt-cagle> ;
+    dcterms:created "2026-04-02"^^xsd:date ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    owl:versionIRI <https://ontologist.io/ns/holon/0.9.0> ;
+    owl:versionInfo "0.9.0" ;
+    rdfs:seeAlso <https://github.com/kurtcagle/holon-graph> ;
+    rdfs:seeAlso <https://ontologist.substack.com> .
+
+
+# ============================================================
+# SECTION 1: Core Class — Holon
+# ============================================================
+
+holon:Holon
+    a owl:Class ;
+    rdfs:label "Holon"@en ;
+    rdfs:comment
+        "A fundamental unit of knowledge organisation that is simultaneously a whole and a part of a larger whole, following Arthur Koestler's definition in 'The Ghost in the Machine' (1967). A holon encapsulates four distinct graph layers: SceneGraph (internal state), DomainGraph (normative boundary), ContextGraph (situational relations), and HolonicGraph (meta-level composition)."@en ;
+    skos:definition
+        "An autonomous, self-contained knowledge unit that participates in larger holonic structures while maintaining its own internal coherence."@en ;
+    skos:scopeNote
+        "Holons may be nested arbitrarily deeply. Every non-apex holon is simultaneously a part (within its parent) and a whole (with respect to its children)."@en .
+
+
+# ============================================================
+# SECTION 2: Graph Layer Classes
+# ============================================================
+
+holon:GraphLayer
+    a owl:Class ;
+    rdfs:label "Graph Layer"@en ;
+    rdfs:comment
+        "Abstract superclass for the four structural layers of a holon. Each layer captures a distinct epistemic perspective on the holon."@en .
+
+# ---- Layer 1: SceneGraph ----
+
+holon:SceneGraph
+    a owl:Class ;
+    rdfs:subClassOf holon:GraphLayer ;
+    rdfs:label "Scene Graph"@en ;
+    rdfs:comment
+        "Layer 1 (interior/immanent). Contains the entities, events, relations, and local state that constitute the holon's internal world. Corresponds to 'internal states' in Active Inference. In narratological terms, maps to the fabula (story-world)."@en ;
+    skos:notation "L1"^^xsd:string ;
+    skos:altLabel "Interior Graph"@en, "Immanent Graph"@en .
+
+# ---- Layer 2: DomainGraph ----
+
+holon:DomainGraph
+    a owl:Class ;
+    rdfs:subClassOf holon:GraphLayer ;
+    rdfs:label "Domain Graph"@en ;
+    rdfs:comment
+        "Layer 2 (boundary/normative). Defines the constraints, type definitions, inference rules, and normative expectations governing the holon. Structurally equivalent to a Markov blanket in Active Inference: separates internal states from the external environment. SHACL constraint evaluation operates primarily at this layer; constraint violations constitute prediction error."@en ;
+    skos:notation "L2"^^xsd:string ;
+    skos:altLabel "Boundary Graph"@en, "Normative Graph"@en, "Markov Blanket"@en .
+
+# ---- Layer 3: ContextGraph ----
+
+holon:ContextGraph
+    a owl:Class ;
+    rdfs:subClassOf holon:GraphLayer ;
+    rdfs:label "Context Graph"@en ;
+    rdfs:comment
+        "Layer 3 (relational/situational). Captures cross-holon relations, situational positioning, and the holon's participation in wider knowledge structures. The context graph is where external relations are mediated. In narratological terms, maps to the sjuzhet (narrative discourse)."@en ;
+    skos:notation "L3"^^xsd:string ;
+    skos:altLabel "Situational Graph"@en, "Relational Graph"@en .
+
+# ---- Layer 4: HolonicGraph ----
+
+holon:HolonicGraph
+    a owl:Class ;
+    rdfs:subClassOf holon:GraphLayer ;
+    rdfs:label "Holonic Graph"@en ;
+    rdfs:comment
+        "Layer 4 (meta-level/compositional). Describes how holons compose into larger holonic structures, governs spawn operations, and coordinates the relationships among constituent holons. The holonic graph is the apex perspective on a holarchy. In narratological terms, maps to the narration (the act of telling)."@en ;
+    skos:notation "L4"^^xsd:string ;
+    skos:altLabel "Meta Graph"@en, "Compositional Graph"@en .
+
+
+# ============================================================
+# SECTION 3: Portal Classes
+# ============================================================
+
+holon:Portal
+    a owl:Class ;
+    rdfs:label "Portal"@en ;
+    rdfs:comment
+        "A typed boundary interface that mediates information exchange across holon boundaries. Portals are the only sanctioned mechanism for cross-holon communication; they enforce the integrity of the DomainGraph boundary."@en ;
+    skos:scopeNote
+        "Portals should be typed and explicitly declared. Implicit cross-holon access violates the Markov blanket constraint of the DomainGraph."@en .
+
+holon:InputPortal
+    a owl:Class ;
+    rdfs:subClassOf holon:Portal ;
+    rdfs:label "Input Portal"@en ;
+    rdfs:comment "A portal receiving information flow from an external holon into this holon."@en .
+
+holon:OutputPortal
+    a owl:Class ;
+    rdfs:subClassOf holon:Portal ;
+    rdfs:label "Output Portal"@en ;
+    rdfs:comment "A portal transmitting information flow from this holon to an external holon."@en .
+
+holon:BidirectionalPortal
+    a owl:Class ;
+    rdfs:subClassOf holon:Portal ;
+    rdfs:label "Bidirectional Portal"@en ;
+    rdfs:comment "A portal supporting both inbound and outbound information flow."@en .
+
+
+# ============================================================
+# SECTION 4: Projection Graph
+# ============================================================
+
+holon:ProjectionGraph
+    a owl:Class ;
+    rdfs:label "Projection Graph"@en ;
+    rdfs:comment
+        "An abstract representation of a holonic structure projected onto a specialised coordinate system or analytical framework. Projections are lossy by definition: they preserve certain structural properties while suppressing others. Wardley Maps are a formal specialisation of ProjectionGraph (see wardley: ontology)."@en ;
+    skos:example "Wardley Map, UML Class Diagram, Entity-Relationship Diagram, Concept Map"@en .
+
+
+# ============================================================
+# SECTION 5: Actor / Agent Holon Classes
+# ============================================================
+
+holon:ActorHolon
+    a owl:Class ;
+    rdfs:subClassOf holon:Holon ;
+    rdfs:label "Actor Holon"@en ;
+    rdfs:comment
+        "A holon that initiates actions, maintains goals, and makes decisions. An ActorHolon is an agentive entity with full internal state and a normative boundary (DomainGraph) that regulates its behaviour. Corresponds to an Active Inference agent minimising free energy."@en .
+
+holon:ApexHolon
+    a owl:Class ;
+    rdfs:subClassOf holon:ActorHolon ;
+    rdfs:label "Apex Holon"@en ;
+    rdfs:comment
+        "The topmost holon in a holonic hierarchy; it is not partOf any other holon. Governs the narrative, operational, or epistemic context for all sub-holons. In an RPG context, maps to the Game Master role."@en ;
+    owl:disjointWith holon:ProxyHolon .
+
+holon:ProxyHolon
+    a owl:Class ;
+    rdfs:subClassOf holon:ActorHolon ;
+    rdfs:label "Proxy Holon"@en ;
+    rdfs:comment
+        "A holon that acts as a bounded proxy representation of an external actor within the scope of a parent holon. A ProxyHolon has limited internal state; full state resides in the external actor it represents. In an RPG context, maps to player characters (externally controlled actors)."@en .
+
+holon:InternalActorHolon
+    a owl:Class ;
+    rdfs:subClassOf holon:ActorHolon ;
+    rdfs:label "Internal Actor Holon"@en ;
+    rdfs:comment
+        "A fully internalised actor holon whose state and behaviour are completely governed by the parent holon. No external principal controls it. In an RPG context, maps to NPCs."@en .
+
+
+# ============================================================
+# SECTION 6: Narrative Holon Classes
+# ============================================================
+
+holon:NarrativeHolon
+    a owl:Class ;
+    rdfs:subClassOf holon:Holon ;
+    rdfs:label "Narrative Holon"@en ;
+    rdfs:comment
+        "A holon representing a narrative unit. The four holonic layers map to Genette's narratological triad: SceneGraph → fabula; DomainGraph → normative story-world rules; ContextGraph → sjuzhet; HolonicGraph → narration/telling."@en .
+
+holon:SceneHolon
+    a owl:Class ;
+    rdfs:subClassOf holon:NarrativeHolon ;
+    rdfs:label "Scene Holon"@en ;
+    rdfs:comment "A narrative holon corresponding to a discrete scene, episode, or act."@en .
+
+holon:WorldHolon
+    a owl:Class ;
+    rdfs:subClassOf holon:NarrativeHolon ;
+    rdfs:label "World Holon"@en ;
+    rdfs:comment
+        "A narrative holon that constitutes a complete story-world. World-building is the act of constructing a WorldHolon's DomainGraph. Historiography is the partial reconstruction of a WorldHolon's SceneGraph from incomplete evidence."@en .
+
+
+# ============================================================
+# SECTION 7: Object Properties
+# ============================================================
+
+# ---- Holonic composition ----
+
+holon:contains
+    a owl:ObjectProperty ;
+    rdfs:label "contains"@en ;
+    rdfs:domain holon:Holon ;
+    rdfs:range holon:Holon ;
+    rdfs:comment "A holon contains zero or more sub-holons as its constituent parts."@en ;
+    owl:inverseOf holon:partOf .
+
+holon:partOf
+    a owl:ObjectProperty, owl:TransitiveProperty ;
+    rdfs:label "part of"@en ;
+    rdfs:domain holon:Holon ;
+    rdfs:range holon:Holon ;
+    rdfs:comment "Transitive mereological relation: this holon is a constituent part of the specified holon."@en .
+
+# ---- Layer associations ----
+
+holon:hasSceneGraph
+    a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "has scene graph"@en ;
+    rdfs:domain holon:Holon ;
+    rdfs:range holon:SceneGraph ;
+    rdfs:comment "Associates a holon with its Layer 1 interior scene graph."@en .
+
+holon:hasDomainGraph
+    a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "has domain graph"@en ;
+    rdfs:domain holon:Holon ;
+    rdfs:range holon:DomainGraph ;
+    rdfs:comment "Associates a holon with its Layer 2 normative boundary domain graph."@en .
+
+holon:hasContextGraph
+    a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "has context graph"@en ;
+    rdfs:domain holon:Holon ;
+    rdfs:range holon:ContextGraph ;
+    rdfs:comment "Associates a holon with its Layer 3 relational context graph."@en .
+
+holon:hasHolonicGraph
+    a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "has holonic graph"@en ;
+    rdfs:domain holon:Holon ;
+    rdfs:range holon:HolonicGraph ;
+    rdfs:comment "Associates a holon with its Layer 4 meta-level holonic graph."@en .
+
+# ---- Portal ----
+
+holon:hasPortal
+    a owl:ObjectProperty ;
+    rdfs:label "has portal"@en ;
+    rdfs:domain holon:Holon ;
+    rdfs:range holon:Portal ;
+    rdfs:comment "Associates a holon with one of its boundary portals."@en .
+
+holon:connectsTo
+    a owl:ObjectProperty ;
+    rdfs:label "connects to"@en ;
+    rdfs:domain holon:Portal ;
+    rdfs:range holon:Portal ;
+    rdfs:comment "Links a source portal to a target portal on another holon, establishing a communication channel."@en .
+
+# ---- Spawn ----
+
+holon:spawn
+    a owl:ObjectProperty ;
+    rdfs:label "spawn"@en ;
+    rdfs:domain holon:HolonicGraph ;
+    rdfs:range holon:Holon ;
+    rdfs:comment
+        "Named operation: a HolonicGraph spawns a new sub-holon instance. spawn is the primary mechanism for dynamic holon creation and is the basis of DataBook instantiation."@en .
+
+# ---- Projection ----
+
+holon:projects
+    a owl:ObjectProperty ;
+    rdfs:label "projects"@en ;
+    rdfs:domain holon:Holon ;
+    rdfs:range holon:ProjectionGraph ;
+    rdfs:comment "A holon projects its structure onto a ProjectionGraph, producing a specialised view."@en .
+
+# ---- Active Inference ----
+
+holon:hasPrior
+    a owl:ObjectProperty ;
+    rdfs:label "has prior"@en ;
+    rdfs:domain holon:DomainGraph ;
+    rdfs:comment
+        "Associates a DomainGraph with its prior belief structure. Priors constrain what the holon expects to observe at its boundary."@en .
+
+holon:hasMarkovBlanket
+    a owl:ObjectProperty ;
+    rdfs:label "has Markov blanket"@en ;
+    rdfs:domain holon:ActorHolon ;
+    rdfs:range holon:DomainGraph ;
+    rdfs:comment
+        "Alias for hasDomainGraph in Active Inference contexts. The DomainGraph is structurally isomorphic to a Markov blanket: it separates internal states from external states while permitting sensory (input portal) and action (output portal) interactions."@en ;
+    owl:equivalentProperty holon:hasDomainGraph .
+
+
+# ============================================================
+# SECTION 8: Datatype Properties
+# ============================================================
+
+holon:holonID
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "holon ID"@en ;
+    rdfs:domain holon:Holon ;
+    rdfs:range xsd:string ;
+    rdfs:comment "A stable, unique string identifier for this holon instance."@en .
+
+holon:holonVersion
+    a owl:DatatypeProperty ;
+    rdfs:label "holon version"@en ;
+    rdfs:domain holon:Holon ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Semantic version string for this holon instance or definition."@en .
+
+holon:createdAt
+    a owl:DatatypeProperty ;
+    rdfs:label "created at"@en ;
+    rdfs:domain holon:Holon ;
+    rdfs:range xsd:dateTime ;
+    rdfs:comment "Timestamp at which this holon was instantiated."@en .
+
+holon:modifiedAt
+    a owl:DatatypeProperty ;
+    rdfs:label "modified at"@en ;
+    rdfs:domain holon:Holon ;
+    rdfs:range xsd:dateTime ;
+    rdfs:comment "Timestamp of the most recent modification to this holon."@en .
+
+holon:predictionError
+    a owl:DatatypeProperty ;
+    rdfs:label "prediction error"@en ;
+    rdfs:domain holon:DomainGraph ;
+    rdfs:range xsd:decimal ;
+    rdfs:comment
+        "Numeric measure of prediction error accumulated at the DomainGraph boundary. Maps to aggregated SHACL validation severity: 0.0 = fully conformant (no free energy); higher values indicate constraint violations requiring model revision."@en .
+
+holon:layerDepth
+    a owl:DatatypeProperty ;
+    rdfs:label "layer depth"@en ;
+    rdfs:domain holon:Holon ;
+    rdfs:range xsd:nonNegativeInteger ;
+    rdfs:comment "Depth of this holon within its holarchy. ApexHolon = 0."@en .

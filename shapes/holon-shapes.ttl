@@ -1,0 +1,427 @@
+# ============================================================
+# Holonic Graph Architecture — SHACL 1.2 Shapes
+# holon-shapes.ttl
+#
+# Namespace:   https://ontologist.io/ns/holon#
+# Version:     0.9.0
+# Date:        2026-04-02
+# Author:      Kurt Cagle <https://ontologist.io/person/kurt-cagle>
+# Repository:  https://github.com/kurtcagle/holon-graph
+#
+# Description:
+#   Normative SHACL 1.2 constraint shapes for HGA instances.
+#   These shapes operate at Layer 2 (DomainGraph) of each holon,
+#   implementing the Markov blanket enforcement semantics.
+#
+#   Constraint violations are interpreted as prediction errors
+#   in Active Inference terms. Severity maps as:
+#     sh:Violation → high prediction error (model revision required)
+#     sh:Warning   → moderate prediction error (adaptation suggested)
+#     sh:Info      → low prediction error (monitoring only)
+#
+#   Conformance with SHACL 1.2 (W3C Working Draft):
+#     - sh:reifierShape for RDF 1.2 triple-term reification
+#     - sh:if / sh:then / sh:else conditional shapes
+#     - Standard sh:NodeShape and sh:PropertyShape
+#
+# ============================================================
+
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+@prefix holon:   <https://ontologist.io/ns/holon#> .
+@prefix portal:  <https://ontologist.io/ns/portal#> .
+@prefix agent:   <https://ontologist.io/ns/agent#> .
+@prefix session: <https://ontologist.io/ns/session#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+
+# ============================================================
+# Shapes Graph Declaration
+# ============================================================
+
+<https://ontologist.io/ns/holon/shapes>
+    a owl:Ontology ;
+    dcterms:title "Holonic Graph Architecture SHACL 1.2 Shapes"@en ;
+    dcterms:description "Normative constraint shapes for HGA instances."@en ;
+    owl:imports <https://ontologist.io/ns/holon> ;
+    owl:versionInfo "0.9.0" .
+
+
+# ============================================================
+# SECTION 1: Core Holon Shapes
+# ============================================================
+
+holon:HolonShape
+    a sh:NodeShape ;
+    sh:targetClass holon:Holon ;
+    rdfs:label "Holon Shape"@en ;
+    rdfs:comment "Core constraints applicable to every Holon instance."@en ;
+
+    # holonID: required, unique string
+    sh:property [
+        sh:path holon:holonID ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:minLength 1 ;
+        sh:severity sh:Violation ;
+        sh:message "A Holon must have exactly one non-empty holonID."@en
+    ] ;
+
+    # rdfs:label: required for human readability
+    sh:property [
+        sh:path rdfs:label ;
+        sh:datatype xsd:string ;
+        sh:minCount 1 ;
+        sh:severity sh:Warning ;
+        sh:message "A Holon should have at least one rdfs:label."@en
+    ] ;
+
+    # SceneGraph: at most one
+    sh:property [
+        sh:path holon:hasSceneGraph ;
+        sh:class holon:SceneGraph ;
+        sh:maxCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "A Holon may have at most one SceneGraph (L1)."@en
+    ] ;
+
+    # DomainGraph: at most one
+    sh:property [
+        sh:path holon:hasDomainGraph ;
+        sh:class holon:DomainGraph ;
+        sh:maxCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "A Holon may have at most one DomainGraph (L2)."@en
+    ] ;
+
+    # ContextGraph: at most one
+    sh:property [
+        sh:path holon:hasContextGraph ;
+        sh:class holon:ContextGraph ;
+        sh:maxCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "A Holon may have at most one ContextGraph (L3)."@en
+    ] ;
+
+    # HolonicGraph: at most one
+    sh:property [
+        sh:path holon:hasHolonicGraph ;
+        sh:class holon:HolonicGraph ;
+        sh:maxCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "A Holon may have at most one HolonicGraph (L4)."@en
+    ] ;
+
+    # createdAt: if present, must be xsd:dateTime
+    sh:property [
+        sh:path holon:createdAt ;
+        sh:datatype xsd:dateTime ;
+        sh:maxCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "holon:createdAt must be a single xsd:dateTime value."@en
+    ] ;
+
+    # modifiedAt: if present, must be xsd:dateTime
+    sh:property [
+        sh:path holon:modifiedAt ;
+        sh:datatype xsd:dateTime ;
+        sh:maxCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "holon:modifiedAt must be a single xsd:dateTime value."@en
+    ] ;
+
+    # partOf: a holon must not be partOf itself (acyclicity check at top level)
+    sh:property [
+        sh:path holon:partOf ;
+        sh:class holon:Holon ;
+        sh:severity sh:Violation ;
+        sh:message "holon:partOf must reference a Holon instance."@en
+    ] .
+
+
+# ---- Acyclicity: a Holon must not be partOf itself ----
+
+holon:HolonAcyclicityShape
+    a sh:NodeShape ;
+    sh:targetClass holon:Holon ;
+    rdfs:label "Holon Acyclicity Shape"@en ;
+    sh:sparql [
+        sh:message "A Holon must not be transitively partOf itself (cycle detected)."@en ;
+        sh:severity sh:Violation ;
+        sh:select """
+            PREFIX holon: <https://ontologist.io/ns/holon#>
+            SELECT $this
+            WHERE {
+                $this holon:partOf+ $this .
+            }
+        """
+    ] .
+
+
+# ============================================================
+# SECTION 2: Graph Layer Shapes
+# ============================================================
+
+holon:SceneGraphShape
+    a sh:NodeShape ;
+    sh:targetClass holon:SceneGraph ;
+    rdfs:label "Scene Graph Shape"@en ;
+    rdfs:comment "Constraints on Layer 1 (interior/immanent) graph instances."@en ;
+
+    sh:property [
+        sh:path [ sh:inversePath holon:hasSceneGraph ] ;
+        sh:class holon:Holon ;
+        sh:minCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "A SceneGraph must be associated with exactly one Holon via holon:hasSceneGraph."@en
+    ] .
+
+holon:DomainGraphShape
+    a sh:NodeShape ;
+    sh:targetClass holon:DomainGraph ;
+    rdfs:label "Domain Graph Shape"@en ;
+    rdfs:comment "Constraints on Layer 2 (boundary/normative) graph instances."@en ;
+
+    sh:property [
+        sh:path [ sh:inversePath holon:hasDomainGraph ] ;
+        sh:class holon:Holon ;
+        sh:minCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "A DomainGraph must be associated with exactly one Holon via holon:hasDomainGraph."@en
+    ] ;
+
+    sh:property [
+        sh:path holon:predictionError ;
+        sh:datatype xsd:decimal ;
+        sh:maxCount 1 ;
+        sh:minInclusive 0.0 ;
+        sh:severity sh:Violation ;
+        sh:message "holon:predictionError must be a non-negative decimal."@en
+    ] .
+
+
+# ============================================================
+# SECTION 3: Portal Shapes
+# ============================================================
+
+holon:PortalShape
+    a sh:NodeShape ;
+    sh:targetClass holon:Portal ;
+    rdfs:label "Portal Shape"@en ;
+
+    sh:property [
+        sh:path [ sh:inversePath holon:hasPortal ] ;
+        sh:class holon:Holon ;
+        sh:minCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "A Portal must be associated with at least one Holon via holon:hasPortal."@en
+    ] ;
+
+    sh:property [
+        sh:path holon:connectsTo ;
+        sh:class holon:Portal ;
+        sh:severity sh:Violation ;
+        sh:message "holon:connectsTo must reference a Portal instance."@en
+    ] .
+
+# InputPortal: cannot receive from another InputPortal
+
+holon:InputPortalShape
+    a sh:NodeShape ;
+    sh:targetClass holon:InputPortal ;
+    rdfs:label "Input Portal Shape"@en ;
+    sh:property [
+        sh:path holon:connectsTo ;
+        sh:not [ sh:class holon:InputPortal ] ;
+        sh:severity sh:Violation ;
+        sh:message "An InputPortal must not connect to another InputPortal."@en
+    ] .
+
+# OutputPortal: must connect to InputPortal or BidirectionalPortal
+
+holon:OutputPortalShape
+    a sh:NodeShape ;
+    sh:targetClass holon:OutputPortal ;
+    rdfs:label "Output Portal Shape"@en ;
+    sh:property [
+        sh:path holon:connectsTo ;
+        sh:or (
+            [ sh:class holon:InputPortal ]
+            [ sh:class holon:BidirectionalPortal ]
+        ) ;
+        sh:severity sh:Violation ;
+        sh:message "An OutputPortal must connect to an InputPortal or BidirectionalPortal."@en
+    ] .
+
+
+# ============================================================
+# SECTION 4: Actor Holon Shapes
+# ============================================================
+
+# ActorHolon: must have a DomainGraph (normative boundary required)
+
+holon:ActorHolonShape
+    a sh:NodeShape ;
+    sh:targetClass holon:ActorHolon ;
+    rdfs:label "Actor Holon Shape"@en ;
+    sh:property [
+        sh:path holon:hasDomainGraph ;
+        sh:class holon:DomainGraph ;
+        sh:minCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "An ActorHolon must have at least one DomainGraph (normative boundary required for agency)."@en
+    ] ;
+    sh:property [
+        sh:path holon:hasSceneGraph ;
+        sh:class holon:SceneGraph ;
+        sh:minCount 1 ;
+        sh:severity sh:Warning ;
+        sh:message "An ActorHolon should have a SceneGraph (internal state layer recommended for agents)."@en
+    ] .
+
+# ApexHolon: must not be partOf any other holon
+
+holon:ApexHolonShape
+    a sh:NodeShape ;
+    sh:targetClass holon:ApexHolon ;
+    rdfs:label "Apex Holon Shape"@en ;
+    sh:property [
+        sh:path holon:partOf ;
+        sh:maxCount 0 ;
+        sh:severity sh:Violation ;
+        sh:message "An ApexHolon must not be partOf any other Holon."@en
+    ] ;
+    sh:property [
+        sh:path holon:hasHolonicGraph ;
+        sh:class holon:HolonicGraph ;
+        sh:minCount 1 ;
+        sh:severity sh:Warning ;
+        sh:message "An ApexHolon should declare a HolonicGraph (compositional governance)."@en
+    ] .
+
+# ProxyHolon: must be partOf a parent holon
+
+holon:ProxyHolonShape
+    a sh:NodeShape ;
+    sh:targetClass holon:ProxyHolon ;
+    rdfs:label "Proxy Holon Shape"@en ;
+    sh:property [
+        sh:path holon:partOf ;
+        sh:class holon:Holon ;
+        sh:minCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "A ProxyHolon must be partOf at least one parent Holon."@en
+    ] .
+
+
+# ============================================================
+# SECTION 5: Projection Graph Shapes
+# ============================================================
+
+holon:ProjectionGraphShape
+    a sh:NodeShape ;
+    sh:targetClass holon:ProjectionGraph ;
+    rdfs:label "Projection Graph Shape"@en ;
+    sh:property [
+        sh:path [ sh:inversePath holon:projects ] ;
+        sh:class holon:Holon ;
+        sh:minCount 1 ;
+        sh:severity sh:Warning ;
+        sh:message "A ProjectionGraph should be referenced by at least one Holon via holon:projects."@en
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 1 ;
+        sh:severity sh:Info ;
+        sh:message "A ProjectionGraph should have a human-readable label."@en
+    ] .
+
+
+# ============================================================
+# SECTION 6: Conditional Shapes (sh:if / sh:then / sh:else)
+# ============================================================
+
+# If a Holon has a HolonicGraph, it should have both SceneGraph and DomainGraph
+
+holon:HolonicGraphImpliesLayersShape
+    a sh:NodeShape ;
+    sh:targetClass holon:Holon ;
+    rdfs:label "Holonic Graph Implies Layers Shape"@en ;
+    sh:if [
+        sh:property [
+            sh:path holon:hasHolonicGraph ;
+            sh:minCount 1
+        ]
+    ] ;
+    sh:then [
+        sh:property [
+            sh:path holon:hasSceneGraph ;
+            sh:minCount 1 ;
+            sh:severity sh:Warning ;
+            sh:message "A Holon with a HolonicGraph (L4) should also declare a SceneGraph (L1)."@en
+        ] ;
+        sh:property [
+            sh:path holon:hasDomainGraph ;
+            sh:minCount 1 ;
+            sh:severity sh:Warning ;
+            sh:message "A Holon with a HolonicGraph (L4) should also declare a DomainGraph (L2)."@en
+        ]
+    ] .
+
+# If layerDepth = 0, then the Holon should be typed as ApexHolon
+
+holon:DepthZeroIsApexShape
+    a sh:NodeShape ;
+    sh:targetClass holon:Holon ;
+    rdfs:label "Depth Zero Is Apex Shape"@en ;
+    sh:if [
+        sh:property [
+            sh:path holon:layerDepth ;
+            sh:hasValue 0
+        ]
+    ] ;
+    sh:then [
+        sh:class holon:ApexHolon ;
+        sh:severity sh:Warning ;
+        sh:message "A Holon with layerDepth 0 should be typed as holon:ApexHolon."@en
+    ] .
+
+
+# ============================================================
+# SECTION 7: RDF 1.2 Reifier Shapes (sh:reifierShape)
+# ============================================================
+#
+# These shapes constrain the metadata that may be attached to
+# triple terms using RDF 1.2 inline reification syntax.
+# Applies where triple terms carry provenance or confidence data.
+#
+# Example RDF 1.2 Turtle syntax:
+#   :holonA holon:contains :holonB
+#       ~ holon:containmentRelation {|
+#           holon:strength 0.85 ;
+#           prov:generatedAtTime "2026-04-02T09:00:00Z"^^xsd:dateTime
+#       |} .
+
+holon:ContainmentReifierShape
+    a sh:NodeShape ;
+    rdfs:label "Containment Reifier Shape"@en ;
+    rdfs:comment "Constrains metadata on reified holon:contains triple terms."@en ;
+
+    # sh:reifierShape targets the reifier node of a triple term
+    sh:reifierShape [
+        sh:targetSubjectsOf holon:contains ;
+
+        sh:property [
+            sh:path holon:strength ;
+            sh:datatype xsd:decimal ;
+            sh:maxCount 1 ;
+            sh:minInclusive 0.0 ;
+            sh:maxInclusive 1.0 ;
+            sh:severity sh:Violation ;
+            sh:message "holon:strength on a containment triple must be a decimal in [0.0, 1.0]."@en
+        ]
+    ] .
